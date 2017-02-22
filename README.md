@@ -13,23 +13,19 @@ AWS Key Management Service (KMS) allows you to easily create and control the key
 ### 3 - `user_data.sh` startup script
 
 ### 4 - Create encrypted secrets file
-a. Create new S3 folder where secrets will be stored
-b. Using a text editor, create the unecrypted secrets file
-c. Write encrypted secrets file to S3 bucket:
+* Create new S3 folder where secrets will be stored
+* Using a text editor, create the unencrypted secrets file
+* Write encrypted secrets file to S3 bucket:
 $ ./put_creds.sh -b kelsus-ecs -k tutorial-0/ecs.config -f ecs.config
-
-```
-./get_creds.sh -b kelsus-ecs -k tutorial-0/ecs.config
-```
 
 
 ## Create Cluster
 
 ### 1 - Create new ECS cluster
-Via AWS console, select ECS->Create cluster
-Choose instance size, keypair, and number of instances
-Choose VPC and subnets
-IAM = ecsInstanceRole
+* Via AWS console, select ECS->Create cluster
+* Choose instance size, keypair, and number of instances
+* Choose VPC and subnets
+* IAM = ecsInstanceRole
 
 ### 2 - Create new Launch Configuration with proper startup script
 a. Go to EC2->Launch Configuration and select the new launch configuration that was created as part of the ECS cluster creation
