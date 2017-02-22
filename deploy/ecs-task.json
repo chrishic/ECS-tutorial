@@ -1,7 +1,7 @@
 {
-    "family": "ecs-tutorial-service",
+    "family": "ecs-__SERVICE_NAME__",
     "containerDefinitions": [{
-        "name": "tutorial-service",
+        "name": "__SERVICE_NAME__",
         "memory": 256,
         "cpu": 256,
         "portMappings": [{

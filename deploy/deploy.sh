@@ -12,12 +12,12 @@ if [[ $CLUSTER_NUM -lt 1 || $CLUSTER_NUM -gt 4 ]]; then
     usage;
 fi
 
-SERVICE_NAME="tutorial-service"
-CLUSTER_NAME="$SERVICE_NAME-$CLUSTER_NUM"
+SERVICE_NAME="tutorial-$CLUSTER_NUM"
+CLUSTER_NAME="$SERVICE_NAME"
 TASK_DEFINITION_NAME="ecs-$SERVICE_NAME"
 ECS_TASK_JSON="ecs-task.json"
 
-IMAGE="chrishic/$SERVICE_NAME"
+IMAGE="nginx:alpine"
 
 die() {
     echo >&2 "=> ERROR: $@"
@@ -36,8 +36,11 @@ fi
 
 echo "Deploying..."
 
+# Splice task name into ECS task template
+CLI_JSON=`cat $ECS_TASK_JSON | sed -e 's@__SERVICE_NAME__@'"$SERVICE_NAME"'@'`
+
 # Splice image name into ECS task template
-CLI_JSON=`cat $ECS_TASK_JSON | sed -e 's@__IMAGE__@'"$IMAGE"'@'`
+CLI_JSON=`echo $CLI_JSON | sed -e 's@__IMAGE__@'"$IMAGE"'@'`
 
 # Create new task definition with ECS
 aws ecs register-task-definition --cli-input-json "$CLI_JSON" > /dev/null 2>&1
@@ -47,7 +50,7 @@ fi
 
 # Verify ECS service exists
 SERVICE_DESCRIPTOR=$(aws ecs describe-services --cluster $CLUSTER_NAME --service $SERVICE_NAME | jq "(.services[] | select((.status==\"ACTIVE\") and .serviceName==\"$SERVICE_NAME\"))")
-if [[ -z $SERVICE_DESCRIPTOR ]]; then
+if [[ -z "$SERVICE_DESCRIPTOR" ]]; then
     # Service doesn't exist - create it
     echo "ECS service, $SERVICE_NAME, does not exist. Creating it."
     aws ecs create-service --cluster $CLUSTER_NAME --service-name $SERVICE_NAME --task-definition $TASK_DEFINITION_NAME --desired-count 1 --deployment-configuration maximumPercent=200,minimumHealthyPercent=0 > /dev/null 2>&1
