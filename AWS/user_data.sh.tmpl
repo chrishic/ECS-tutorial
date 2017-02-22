@@ -1,0 +1,27 @@
+#!/bin/bash
+
+yum update -y
+yum install -y aws-cli
+
+export AWS_DEFAULT_REGION=us-west-2
+
+# Initialize our ECS container agent. See http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html
+
+# Retrieve encrypted credentials file from S3
+aws s3 cp s3://kelsus-ecs/__CLUSTER_NAME__/ecs.config ecs.config.enc
+
+# Decrypt
+aws kms decrypt --ciphertext-blob fileb://ecs.config.enc --query Plaintext --output text | base64 --decode > /etc/ecs/ecs.config
+
+# Remove tmp file
+rm ecs.config.enc
+
+# Also create .dockercfg to allow for private repo access when running outside of Docker
+cat /etc/ecs/ecs.config | grep ECS_ENGINE_AUTH_DATA | cut -d= -f2- > ~/.dockercfg
+
+# Create the docker-cleanup script
+echo "echo 'Running docker-cleanup...'" > /tmp/docker-cleanup.sh
+echo "docker run -e LOOP=false -e DELAY_TIME=10 -v /var/run/docker.sock:/var/run/docker.sock:rw -v /var/lib/docker:/var/lib/docker:rw meltwater/docker-cleanup:latest" >> /tmp/docker-cleanup.sh
+
+# Add the cron file
+echo -e "SHELL=/bin/bash\n@hourly root bash < /tmp/docker-cleanup.sh > /var/log/hourly-cron.log 2>&1" > /etc/cron.d/ecs-hourly-cron

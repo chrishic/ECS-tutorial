@@ -1,0 +1,20 @@
+# Mac OS misc
+.DS_Store
+
+# node.js package management
+node_modules/
+
+# 'config' files
+runtime.json
+
+# Log files
+logs/
+*.log
+shared/
+
+# Docker
+**/.env
+
+# Generated files
+user_data.sh
+ecs.config

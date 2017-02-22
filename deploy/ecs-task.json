@@ -1,0 +1,24 @@
+{
+    "family": "ecs-tutorial-service",
+    "containerDefinitions": [{
+        "name": "tutorial-service",
+        "memory": 256,
+        "cpu": 256,
+        "portMappings": [{
+            "hostPort": 8080,
+            "containerPort": 80
+        }],
+        "environment": [
+            {
+                "name": "APP_ENV",
+                "value": "production"
+            }
+        ],
+        "essential": true,
+        "entryPoint": [],
+        "links": [],
+        "volumesFrom": [],
+        "command": [],
+        "image": "__IMAGE__"
+    }]
+}
